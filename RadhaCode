@@ -1,0 +1,29 @@
+ods html close;
+ods listing gpath="C:\Users\rdutta\Desktop";
+
+option ls=100 nodate; /* sets line width at 100 characters */
+title 'Fire vs Invol'; /* gives the output a title */
+
+data insurance;            /* This data set will be a temporary sas file with name 'atct' */
+infile 'C:\Users\rdutta\Desktop\insurance.txt' firstobs = 2;     /* specifies file to read from */
+input zip $ fire theft age income race vol invol;     
+/* names input variables BE SURE TO CHECK EACH DATA SET FOR THE ORDER OF X,Y VARIABLES */
+run;
+
+proc print data=insurance; /* print out the data,*/
+run;
+
+proc reg data=insurance;
+model invol=fire;
+plot invol*fire;
+output out = fireinvol r=fire_Resid;
+plot r.*fire r.*p. r.*nqq.;
+run;
+
+proc univariate data=insurance plot;
+var invol fire;
+run;
+
+proc univariate plot data=fireinvol;
+var fire_Resid;
+run;
