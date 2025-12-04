@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stats 525 Insurance Project – SAS Code</title>
+
+  <!-- Highlight.js core CSS -->
+  <link rel="stylesheet"
+        href="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/default.min.css"><!-- [web:7] -->
+
+  <!-- Highlight.js core script -->
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script><!-- [web:7] -->
+
+  <!-- Use plain-text highlighting since SAS is not a built‑in language in CDN build -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll("pre code").forEach((block) => {
+        hljs.highlightElement(block);
+      });
+    });
+  </script>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 2rem;
+      background-color: #f7f7f7;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .code-container {
+      max-width: 960px;
+      margin: 1.5rem auto;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+    pre {
+      overflow-x: auto;
+      padding: 1rem;
+      background: #1e1e1e;
+      color: #f8f8f2;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <h1>Insurance IE Project</h1>
+  <h2>SAS Code Listing</h2>
+
+  <div class="code-container">
+    <pre><code class="language-plaintext">
+proc import datafile="/folders/myfolders/IE_project/by_zip.csv" out=insurance_raw 
+        dbms=csv replace;
+    getnames=yes;
+run;
+
+data insurance_final;
+    set insurance_raw;
+    root_invol = sqrt(invol);
+    log_fire   = log(fire);
+    root_race  = log(race);
+    s_income   = income * s;
+    log_income = log(income);
+    invol      = invol + 1;
+    fr         = log_fire * root_race;
+run;
+
+/* MODEL 1 for invol */
+proc reg data = insurance_final;
+    model invol = log_fire log_income root_race age theft / r cli clm vif;
+    plot r.*p. r.*nqq.;
+run;
+
+/* MODELS FOR INVOL */
+
+/* A */
+proc reg data = insurance_final;
+    model invol = log_income age theft root_race log_fire / r cli clm vif;
+    plot r.*p. r.*nqq.;
+run;
+
+/* B */
+proc reg data = insurance_final;
+    model invol = log_income age theft root_race log_fire / r cli clm vif;
+    plot r.*p. r.*nqq.;
+run;
+
+/* C */
+proc reg data = insurance_final;
+    model root_invol = log_fire income age root_race;
+run;
+
+/* D */
+proc reg data = insurance_final;
+    model root_invol = log_fire income age root_race theft;
+run;
+
+/* E */
+proc reg data = insurance_final;
+    model root_invol = log_fire income age root_race;
+run;
+    </code></pre>
+  </div>
+</body>
+</html>
